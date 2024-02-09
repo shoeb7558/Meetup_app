@@ -1,4 +1,3 @@
-import React from 'react'
 import MeetupList from '../components/meetups/MeetupList'
 
 const DUMMY_MEETUPS = [
@@ -15,19 +14,45 @@ const DUMMY_MEETUPS = [
         image: 'https://www.itchotels.com/content/dam/itchotels/in/umbrella/welcomHotel/hotels/welcomhotelramainternational-aurangabad/images/headmast/desktop/welcomhotel-rama-international.png',
         address: 'some place in some city',
         discription: 'Monthly party'
+    },
+    {
+        id: 'm3',
+        title: 'A collage Party',
+        image: 'https://www.itchotels.com/content/dam/itchotels/in/umbrella/welcomHotel/hotels/welcomhotelramainternational-aurangabad/images/headmast/desktop/welcomhotel-rama-international.png',
+        address: 'some place in some city',
+        discription: 'yearly party'
     }
 ]
 
 
-function HomePage() {
-  return (
-    <div>
-      
-      
-      <MeetupList meetups={DUMMY_MEETUPS}/>
-      
+function HomePage(props) {
+    return (
+    <div>     
+      <MeetupList meetups={props.meetups}/>      
     </div>
   )
+}
+
+// export async function getServerSideProps(context){
+//     const req = context.req;
+//     const res = context.res;
+
+//     return {
+//         props:{
+//             meetups: DUMMY_MEETUPS
+//         },
+        
+//     }
+// }
+
+
+export async function getStaticProps(){
+    return {
+        props:{
+            meetups: DUMMY_MEETUPS
+        },
+        revalidate: 1
+    }
 }
 
 export default HomePage
