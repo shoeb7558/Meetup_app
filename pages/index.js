@@ -1,28 +1,29 @@
 import MeetupList from '../components/meetups/MeetupList'
+import { MongoClient } from 'mongodb'
 
-const DUMMY_MEETUPS = [
-    {
-        id: 'm1',
-        title: 'A First Meetup',
-        image: 'https://www.vivantahotels.com/content/dam/vivanta/hotels/vbt-aurangabad/gallery/Facade-view_3x2.png/jcr:content/renditions/cq5dam.web.756.756.png',
-        address: 'some place in some city',
-        discription: 'get together'
-    },
-    {
-        id: 'm2',
-        title: 'A office Party',
-        image: 'https://www.itchotels.com/content/dam/itchotels/in/umbrella/welcomHotel/hotels/welcomhotelramainternational-aurangabad/images/headmast/desktop/welcomhotel-rama-international.png',
-        address: 'some place in some city',
-        discription: 'Monthly party'
-    },
-    {
-        id: 'm3',
-        title: 'A collage Party',
-        image: 'https://www.itchotels.com/content/dam/itchotels/in/umbrella/welcomHotel/hotels/welcomhotelramainternational-aurangabad/images/headmast/desktop/welcomhotel-rama-international.png',
-        address: 'some place in some city',
-        discription: 'yearly party'
-    }
-]
+// const DUMMY_MEETUPS = [
+//     {
+//         id: 'm1',
+//         title: 'A First Meetup',
+//         image: 'https://www.vivantahotels.com/content/dam/vivanta/hotels/vbt-aurangabad/gallery/Facade-view_3x2.png/jcr:content/renditions/cq5dam.web.756.756.png',
+//         address: 'some place in some city',
+//         discription: 'get together'
+//     },
+//     {
+//         id: 'm2',
+//         title: 'A office Party',
+//         image: 'https://www.itchotels.com/content/dam/itchotels/in/umbrella/welcomHotel/hotels/welcomhotelramainternational-aurangabad/images/headmast/desktop/welcomhotel-rama-international.png',
+//         address: 'some place in some city',
+//         discription: 'Monthly party'
+//     },
+//     {
+//         id: 'm3',
+//         title: 'A collage Party',
+//         image: 'https://www.itchotels.com/content/dam/itchotels/in/umbrella/welcomHotel/hotels/welcomhotelramainternational-aurangabad/images/headmast/desktop/welcomhotel-rama-international.png',
+//         address: 'some place in some city',
+//         discription: 'yearly party'
+//     }
+// ]
 
 
 function HomePage(props) {
@@ -47,9 +48,28 @@ function HomePage(props) {
 
 
 export async function getStaticProps(){
+    const client = await MongoClient.connect('mongodb+srv://shoebshaikh:ngv9Jg9bfTYCAHKe@cluster1.zxfllfq.mongodb.net/meetups?retryWrites=true&w=majority', {
+        useNewUrlParser: true,
+        useUnifiedTopology: true
+      });
+
+      const db = client.db();
+      const meetupsCollection = db.collection('meetups');
+
+      const meetups = await meetupsCollection.find().toArray()
+
+      client.close()
+
+
     return {
         props:{
-            meetups: DUMMY_MEETUPS
+            meetups: meetups.map(meetup => ({
+                title: meetup.title,
+                address: meetup.address,
+                image: meetup.image,
+                id: meetup._id.toString()
+
+            }))
         },
         revalidate: 1
     }
