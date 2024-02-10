@@ -1,29 +1,34 @@
 import React from 'react'
+import { MongoClient, ObjectId } from 'mongodb';}
 import './MeetupDetails.module.css'
 
-function MeetupDetails() {
+function MeetupDetails(props) {
   return (
     <div className='details'>
-        <img
-        src='https://www.vivantahotels.com/content/dam/vivanta/hotels/vbt-aurangabad/gallery/Facade-view_3x2.png/jcr:content/renditions/cq5dam.web.756.756.png'
-        alt='A First Meetup'
-        />
-        <h1>A First Meetup</h1>
-        <address>Some Street, Some City</address>
-        <p>The meetup description</p>
+        <img src={props.meetupData.image} />
+        <h1>{props.meetupData.title}</h1>
+        <address>{props.meetupData.address}</address>
+        <p>{props.meetupData.description}</p>
       
     </div>
   )
 }
 
+
 export async function getStaticPaths() {
+    const client = await MongoClient.connect('mongodb+srv://shoebshaikh:ngv9Jg9bfTYCAHKe@cluster1.zxfllfq.mongodb.net/meetups?retryWrites=true&w=majority', {
+        useNewUrlParser: true,
+        useUnifiedTopology: true
+      });
+
+      const db = client.db();
+      const meetupsCollection = db.collection('meetups');
+
+      const meetups = await meetupsCollection.find({},{_id:1}).toArray()
+    
     return {
         fallback: false,
-        paths: [
-            { params: { meetupid: 'm1' } },
-            { params: { meetupid: 'm2' } },
-            { params: { meetupid: 'm3' } }
-        ]
+        paths: meetups.map(meetup =>({ params: { meetupId: meetup._id.toString()}}))
     };
 }
 
@@ -31,19 +36,31 @@ export async function getStaticPaths() {
 
 
 export async function getStaticProps(context){
-    const { meetupId } = context.params; // Correctly destructure meetupId from context
-    console.log(meetupId)
+    const meetupId = context.params.meetupId
+
+    const client = await MongoClient.connect('mongodb+srv://shoebshaikh:ngv9Jg9bfTYCAHKe@cluster1.zxfllfq.mongodb.net/meetups?retryWrites=true&w=majority', {
+        useNewUrlParser: true,
+        useUnifiedTopology: true
+      });
+
+      const db = client.db();
+      const meetupsCollection = db.collection('meetups');
+
+      const selectedMeetups = await meetupsCollection.findOne({_id: ObjectId(meetupId)})
+
+      client.close()
+    // const { meetupId } = context.params; // Correctly destructure meetupId from context
+    // console.log(meetupId)
     return {
         props:{
             meetupData: {
-                image: 'https://www.vivantahotels.com/content/dam/vivanta/hotels/vbt-aurangabad/gallery/Facade-view_3x2.png/jcr:content/renditions/cq5dam.web.756.756.png',
-                id: 'm1', // Ensure that meetupId is properly set
-                title: 'First Meetup',
-                address: 'Some City',
-                description: 'this is the first meetup'
+                id: selectedMeetups._id.toString(),
+                title: selectedMeetups.title,
+                address: selectedMeetups.address,
+                image: selectedMeetups.image,
+                description: selectedMeetups.description
             }
-        },
-        revalidate: 1
+        }
     }
 }
 
